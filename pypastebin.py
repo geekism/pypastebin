@@ -17,13 +17,13 @@ parser.add_argument('-p', action='store', dest='startport', type=int, help='Star
 parser.add_argument('-b', action='store_true', default=False, dest='background', help='Start in the background')
 parser.add_argument('-f', action='store', dest='sslcert', help='Select your myserver.pem')
 parser.add_argument('-l', action='store', dest='listenip', help='Select Listening IP')
-parser.add_argument('-u', action='store', dest='urlhost', help='http(s)://subdomain.domain.com value')
+parser.add_argument('-u', action='store', dest='urlhost', help='subdomain.domain.com value')
 parser.add_argument('-H', action='store', dest='eggdrop_host', help='Eggdrop Relay Hostname/IP')
 parser.add_argument('-C', action='store', dest='eggdrop_chan', help='Eggdrop Relay Channel')
 parser.add_argument('-P', action='store', dest='eggdrop_port', help='Eggdrop Port')
 parser.add_argument('-L', action='store', dest='eggdrop_pass', help='Eggdrop Password')
 parser.add_argument('-U', action='store', dest='eggdrop_user', help='Eggdrop Username')
-parser.add_argument('-R', action='store_true',default=False, dest='enableegg', help='Enable eggdrop relay')
+parser.add_argument('-e', action='store_true',default=False, dest='enableegg', help='Enable eggdrop relay')
 parser.add_argument('-v', action='version', version='%(prog)s 0.2.0')
 results = parser.parse_args()
 
@@ -38,14 +38,29 @@ BACKGROUND = results.background
 URLHOSTNAME = results.urlhost
 RELAY = results.enableegg
 
+if START_SSL == True:
+   HEADER = "https://"
+else:
+   HEADER = "http://"
+
+try:
+  URLHOSTNAME
+except NameError:
+  print "Please define the URL with -u"
+  quit()
+else:
+  print "Webserver URL is: \n"+HEADER+""+URLHOSTNAME+""
+
 if RELAY == True:
 	EHOST = results.eggdrop_host
 	EPORT = results.eggdrop_port
 	EPASSWD = results.eggdrop_pass
 	EUSER = results.eggdrop_user
 	ECHAN = results.eggdrop_chan
-	PURL = results.urlhost
+	URLHOSTNAME = results.urlhost
+    	print "\nEggdrop Settings: \nHost: " + EHOST + ":" + EPORT + " \nUsername: " + EUSER + " \nPassword: ********** \nChannel: #" + ECHAN + ""
 
+#if not os.path.exists('style.css'): open('style.css', 'w').close()
 DIRECTORY = os.path.dirname(os.path.realpath(sys.argv[0]))
 
 if BACKGROUND == True:
@@ -85,7 +100,7 @@ sl = StreamToLogger(stderr_logger, logging.ERROR)
 sys.stderr = sl
 
 
-PSCRIPT = """
+PASTESCRIPT = """
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -97,25 +112,25 @@ PSCRIPT = """
 </center>
 <BR><BR><BR>
 
-#!/usr/bin/perl
-use warnings;
-use LWP::UserAgent; 
-use HTTP::Request::Common qw{ POST };
-use CGI;
-use WWW::Mechanize;
-my $output = "";
-my $pasteserver = "192.168.1.4:8000";
-@userinput = <STDIN>;
-chomp (@userinput);
-foreach $i (@userinput) { $output .= "$i\n"; }
-my $url = "http://".$pasteserver."/create";
-my $ua = LWP::UserAgent->new();
-my $request = POST( $url, [ 'content' => $output ] );
-my $redir = $ua->request($request);
-my $gurl = $redir->header('Location');
-my $content = $ua->request($request)->as_string();
-my $cgi = CGI->new();
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;print "paste: http://".$pasteserver."".$gurl."\n";
+#!/usr/bin/perl<BR>
+use warnings;<BR>
+use LWP::UserAgent;<BR> 
+use HTTP::Request::Common qw{ POST };<BR>
+use CGI;<BR>
+use WWW::Mechanize;<BR>
+my $output = "";<BR>
+my $pasteserver = " """+HEADER+""""""+URLHOSTNAME+"""";<BR>
+@userinput = <STDIN>;<BR>
+chomp (@userinput);<BR>
+foreach $i (@userinput) { $output .= "$i\n"; }<BR>
+my $url = "http://".$pasteserver."/create";<BR>
+my $ua = LWP::UserAgent->new();<BR>
+my $request = POST( $url, [ 'content' => $output ] );<BR>
+my $redir = $ua->request($request);<BR>
+my $gurl = $redir->header('Location');<BR>
+my $content = $ua->request($request)->as_string();<BR>
+my $cgi = CGI->new();<BR>
+print "paste: http://".$pasteserver."".$gurl."\n";<BR>
 </html>
 """
 
@@ -198,21 +213,7 @@ CONTENT_TEMPLATE = """
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <link rel="stylesheet" type="text/css" href="http://shjs.sourceforge.net/sh_style.css">
         <link rel="stylesheet" type="text/css" href="%(CONTEXT_PATH)s/style.css">
-        <style type="text/css">
-            .html { }
-            body {  background: #000000; font-family: monospace; font-size: 12px; color: #1E90FF; }
-            a { color:#C0C0C0; text-decoration: none; }
-            a:hover { color: #fefefe; text-decoration: underline; }
-            textarea { font-family: 'Cantarell', serif; font-size: 16px; }
-            ul { display: block; text-shadow: none; height: 25px; margin: 0 0 0 -40; position: relative; float: center; }
-            li { display: inline; margin-left: 5px; }
-            li .last { margin-left: 30px; }
-            pre { font-family: 'Courier New'; font-size: 16px; text-shadow: none; background-color: white; margin-left: 5px; padding: 5px; border: 1px solid #C9D7F1; margin-top: -5px;}
-            .content { width: 80%; height: 80%; margin-left: 10%; margin-top: 1%; display: block; border: 3px solid #000; font-family: 'Courier New', Arial; } 
-            .button { display:block; width:100px; height:50px; margin-left:45%; font-weight: bold; text-decoration: none; }
-            .ul_parent { position: absolute; }
-            #lang_list_java .lang_java, #lang_list_python .lang_python, #lang_list_javascript .lang_javascript, #lang_list_html .lang_html, #lang_list_css .lang_css, #lang_list_cpp .lang_cpp, #lang_list_sql .lang_sql, #lang_list_plain .lang_plain, #lang_list_desktop .lang_desktop, #lang_list_diff .lang_diff, #lang_list_makefile .lang_makefile, #lang_list_perl .lang_perl, #lang_list_ruby .lang_ruby, #lang_list_xorg .lang_xorg, #lang_list_tcl .lang_tcl { font-weight: bold; }
-        </style>
+
         <script src="http://shjs.sourceforge.net/sh_main.min.js" type="text/javascript"></script>
         <script type="text/javascript" src="http://shjs.sourceforge.net/lang/sh_%(LANG)s.js"></script>
     </head>
@@ -247,8 +248,7 @@ CONTENT_TEMPLATE = """
 """
 
 STYLE_CSS = """
-.html {
-}
+.html { }
 body {	background: #000000; font-family: monospace; font-size: 12px; color: #1E90FF; }
 a { color:#C0C0C0; text-decoration: none; }
 a:hover { color: #fefefe; text-decoration: underline; }
@@ -305,7 +305,7 @@ class MyHandler(SimpleHTTPRequestHandler):
                 self.send_response(200)
                 self.send_header("Content-Type", "text/html")
                 self.end_headers()
-                self.wfile.write(PSCRIPT % {"CONTEXT_PATH": self.get_context_path(),
+                self.wfile.write(PASTESCRIPT % {"CONTEXT_PATH": self.get_context_path(),
                 "CONTEXT_PATH": self.get_context_path()})
 	    elif self.path == "/about":
                 self.send_response(200)
@@ -372,7 +372,7 @@ class MyHandler(SimpleHTTPRequestHandler):
                 tn.write(EUSER + '\n')
                 tn.read_until('Enter your password.')
                 tn.write(EPASSWD + '\n')
-                tn.write(".msg #" + ECHAN + " new paste:\002 " + PURL + "" + filename + "\n")
+                tn.write(".msg #" + ECHAN + " new paste:\002 " + URLHOSTNAME + "" + filename + "\n")
                 time.sleep(1)
                 tn.write(".exit")
                 self.end_headers()
@@ -425,3 +425,4 @@ if __name__ == "__main__":
            pass
        httpd.server_close()
        print time.asctime(), "Server Stops - %s:%s" % (HTTP_IP, HTTP_PORT)
+
