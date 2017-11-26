@@ -96,27 +96,26 @@ PSCRIPT = """
 <a href=/>paste</a> - <a href=/about>about</a> - <a href=/changelog>changelog</a> - <a href=/pastebinit>paste post script</a>
 </center>
 <BR><BR><BR>
-#!/usr/bin/perl<BR>
-use warnings;<BR>
-use LWP::UserAgent; <BR>
-use HTTP::Request::Common qw{ POST };<BR>
-use CGI;<BR>
-use WWW::Mechanize;<BR>
-<BR>
-my $output = "";<BR>
-@userinput = <STDIN>;<BR>
-&nbsp;&nbsp;chomp (@userinput);<BR>
-&nbsp;&nbsp;&nbsp;foreach $i (@userinput) {<BR>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$output .= "$i\n";<BR>
-&nbsp;&nbsp;}<BR>
-&nbsp;&nbsp;my $url = "http://blackness.sytes.net:8181/pasteit";<BR>
-&nbsp;&nbsp;my $ua      = LWP::UserAgent->new();<BR>
-&nbsp;&nbsp;my $request = POST( $url, [ 'content' => $output ] );<BR>
-&nbsp;&nbsp;my $redir = $ua->request($request);<BR>
-&nbsp;&nbsp;my $gurl = $redir->header('Location');<BR>
-&nbsp;&nbsp;my $content = $ua->request($request)->as_string();<BR>
-&nbsp;&nbsp;my $cgi = CGI->new();<BR>
-print "paste: http://blackness.sytes.net:8181".$gurl."\n";<BR>
+
+#!/usr/bin/perl
+use warnings;
+use LWP::UserAgent; 
+use HTTP::Request::Common qw{ POST };
+use CGI;
+use WWW::Mechanize;
+my $output = "";
+my $pasteserver = "192.168.1.4:8000";
+@userinput = <STDIN>;
+chomp (@userinput);
+foreach $i (@userinput) { $output .= "$i\n"; }
+my $url = "http://".$pasteserver."/create";
+my $ua = LWP::UserAgent->new();
+my $request = POST( $url, [ 'content' => $output ] );
+my $redir = $ua->request($request);
+my $gurl = $redir->header('Location');
+my $content = $ua->request($request)->as_string();
+my $cgi = CGI->new();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;print "paste: http://".$pasteserver."".$gurl."\n";
 </html>
 """
 
@@ -136,6 +135,7 @@ CHANGELOG = """
 11-18-2012: paste script completed.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ added robots.txt to drop the crawlers<br>
 11-19-2012: started adding content.<br>
+11-25-2017: picked the project back up after finding it on a random USB stick<br>
 </html>
 """
 
@@ -173,7 +173,7 @@ FORM = """
 <BR><BR><BR>
 <body color=#00000>
     <body style="font-size: 12">
-        <form action="/pasteit" method="POST">
+        <form action="/create" method="POST">
             <textarea name="content" rows="20" class="content"></textarea>
             <BR><BR><a href="javascript:document.forms[0].submit()" class="button">Paste</a>
         </form>
@@ -357,7 +357,7 @@ class MyHandler(SimpleHTTPRequestHandler):
                 return SimpleHTTPRequestHandler.do_GET(self)
     def do_POST(self):
         self.init_params()
-        if self.path == "/pasteit":
+        if self.path == "/create":
             filename = ''.join([random.choice('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890') for i in range(10)])
             f = open(DATA_FOLDER_PATH + "/" + filename, "w")
             f.write(self.params["content"])
