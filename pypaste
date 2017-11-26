@@ -1,0 +1,27 @@
+#!/usr/bin/perl
+use warnings;
+use LWP::UserAgent; 
+use HTTP::Request::Common qw{ POST };
+use CGI;
+use WWW::Mechanize;
+
+my $output = "";
+@userinput = <STDIN>;
+chomp (@userinput);
+foreach $i (@userinput) {
+	$output .= "$i\n";
+}
+my $url = "http://blackness.sytes.net:8181/pasteit";
+my $ua      = LWP::UserAgent->new();
+my $request = POST( $url, [ 'content' => $output ] );
+my $redir = $ua->request($request);
+my $gurl = $redir->header('Location');
+my $content = $ua->request($request)->as_string();
+my $cgi = CGI->new();
+print "paste: http://blackness.sytes.net:8181".$gurl."\n";
+use HTTP::Request::Common qw(GET);
+$ua = LWP::UserAgent->new;
+my $req = POST 'http://is.gd/create.php',
+              [ format => 'simple', url => 'http://blackness.sytes.net:8181".$gurl."' ];
+my $shorturl = $ua->request($req)->as_string;
+@statusurls = ($shorturl =~ m/http:(\S+)/g); print "http:@statusurls\n";
