@@ -1,0 +1,23 @@
+#!/bin/bash
+
+STARTSSL=1
+EGGDROP_RELAY=1
+INTERFACE=wlp3s0
+IPADDRESS=$(ifconfig ${INTERFACE}|egrep --only-matching -E  '(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)'|grep -vE "^255|255$")
+PORT=8000
+
+if [[ ${EGGDROP_RELAY} ]]; then
+	SECOND_ARGUMENTS="-e -H localhost -C black -L pastebinit -U pastebin -P 24000"
+else
+	SECOND_ARGUMENTS=""
+fi
+
+if [[ ${STARTSSL} ]]; then
+	if [[ ! -e server.pem ]]; then openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365; fi
+	FIRST_ARGUMENTS="-s -f server.pem"
+fi
+
+echo "SSL Settings: ${FIRST_ARGUMENTS}"
+echo "Eggdrop Relay Settings: ${SECOND_ARGUMENTS}"
+
+./pypastebin.py ${FIRST_ARGUMENTS} -u ${HOSTNAME} -p ${PORT} -l ${IPADDRESS} ${SECOND_ARGUMENTS}
