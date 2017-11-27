@@ -1,20 +1,40 @@
 #!/bin/bash
 
-STARTSSL=1
-EGGDROP_RELAY=1
-INTERFACE=wlp3s0
+STARTSSL=1; #Enable SSL
+EGGDROP_RELAY=1; #Enable Eggdrop Channel posting
+INTERFACE=wlp3s0; #Your network interface
 IPADDRESS=$(ifconfig ${INTERFACE}|egrep --only-matching -E  '(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)'|grep -vE "^255|255$")
-PORT=8000
+PORT=8000; # Server port
+FIRST_ARGUMENTS="-s -f server.pem"
+SECOND_ARGUMENTS="-e -H localhost -C black -L pastebinit -U pastebin -P 24000"
 
-if [[ ${EGGDROP_RELAY} ]]; then
-	SECOND_ARGUMENTS="-e -H localhost -C black -L pastebinit -U pastebin -P 24000"
-else
+function _makepemfile() {
+cat >openssl.cnf<<EOF
+[ req ]
+prompt = no
+distinguished_name = req_distinguished_name
+[ req_distinguished_name ]
+C = US
+ST = Some State
+L = LOCALLY
+O = SELF
+OU = SELF
+CN = SELF
+emailAddress = pastebin@python.org
+EOF
+}
+
+if [[ ! ${EGGDROP_RELAY} ]]; then
 	SECOND_ARGUMENTS=""
 fi
 
-if [[ ${STARTSSL} ]]; then
-	if [[ ! -e server.pem ]]; then openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365; fi
-	FIRST_ARGUMENTS="-s -f server.pem"
+if [[ ! ${STARTSSL} ]]; then
+	if [[ ! -e server.pem ]]; then
+		_makepemfile
+		openssl req -config openssl.cnf -new -x509 -keyout server.pem -out server.pem -days 365 -nodes
+		rm openssl.cnf
+	fi
+	FIRST_ARGUMENTS=""
 fi
 
 echo "SSL Settings: ${FIRST_ARGUMENTS}"
