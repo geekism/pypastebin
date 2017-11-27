@@ -49,7 +49,7 @@ except NameError:
   print "Please define the URL with -u"
   quit()
 else:
-  print "Webserver URL is: \n"+HEADER+""+URLHOSTNAME+""
+  print "Webserver URL is: "+HEADER+""+URLHOSTNAME+":",HTTP_PORT
 
 if RELAY == True:
 	EHOST = results.eggdrop_host
