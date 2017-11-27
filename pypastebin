@@ -1,0 +1,118 @@
+#!/bin/bash
+### BEGIN INIT INFO
+# Provides:  HASTEBIN
+# Required-Start:$remote_fs $syslog $local_fs $network
+# Required-Stop: $remote_fs $syslog $local_fs $network
+# Should-Start:  $named
+# Should-Stop:   $named
+# Default-Start: 2 3 4 5
+# Default-Stop:  0 1 6
+# Short-Description: Starts pastebin server (hastebin)
+# Description:   Launches pastebin
+
+PATH=/bin:/usr/bin:/sbin:/usr/sbin
+
+# Edit These Values
+
+STARTSSL=0; #Enable SSL
+EGGDROP_RELAY=0; #Enable Eggdrop Channel posting
+INTERFACE=wlp3s0; #Your network interface
+IPADDRESS=$(ifconfig ${INTERFACE}|egrep --only-matching -E  '(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)'|grep -vE "^255|255$")
+SERVER_URL="pypaste.justla.me"
+PORT=8000; # Server port
+FIRST_ARGUMENTS="-b"
+SECOND_ARGUMENTS=""
+
+# Need help? ${0} help.
+
+EGG_USER="pastebin"; # Username to log in with to the eggdrop
+EGG_PASS="pastebinit"; # Password for the eggdrop user
+EGG_PORT="24000"; # Port number of the eggdrop
+EGG_CHAN="black"; # Channel where you want the announce, do not include the pound sign
+EGG_HOST="localhost"; # IP/Hostname of the eggdrop
+
+# DO NOT TOUCH!!
+DAEMON=$(which python)
+PASTEHOME="${HOME}/coding/python/pypastebin/"
+LOGFILE="pastebin.log"
+PIDFILE="${PASTEHOME}/pastebin.pid"
+RUNAS="black"
+NAME=pyPastebin
+OK=$(echo -e "[ \e[0;32m✔\e[00m ]")
+
+_makepemfile() {
+cat >openssl.cnf<<EOF
+[ req ]
+prompt = no
+distinguished_name = req_distinguished_name
+[ req_distinguished_name ]
+C = US
+ST = Some State
+L = LOCALLY
+O = SELF
+OU = SELF
+CN = SELF
+emailAddress = pastebin@python.org
+EOF
+}
+
+
+start() {
+	cd $PASTEHOME
+	if [[ ${EGGDROP_RELAY} == "1" ]]; then SECOND_ARGUMENTS="-e -H ${EGG_HOST} -C ${EGG_CHAN} -L ${EGG_PASS} -U ${EGG_USER} -P ${EGG_PORT}"; fi
+	if [[ ${STARTSSL} == "1" ]]; then
+		if [[ ! -e server.pem ]]; then _makepemfile; openssl req -config openssl.cnf -new -x509 -keyout server.pem -out server.pem -days 365 -nodes; rm openssl.cnf; fi
+		FIRST_ARGUMENTS="-s -f server.pem -b"
+	fi
+	${DAEMON} ${PASTEHOME}/pypastebin.py ${FIRST_ARGUMENTS} -u ${SERVER_URL} -p ${PORT} -l ${IPADDRESS} ${SECOND_ARGUMENTS}
+	echo "${NAME} Server Started: ${OK}"
+}
+
+stop() {
+	if [[ -e ${PIDFILE} ]]; then
+		PID=$(ps ax|grep pypastebin.py|grep -v "grep"|awk '{print $1}')
+		kill -9 ${PID}
+		echo "${NAME} Server Shutdown: ${OK}"
+		rm -rf ${PIDFILE}
+	else
+		echo "${NAME} Server Wasnt Running, try ${0} start"
+	fi
+}
+
+restart() { ${0} stop && ${0} start ; }
+
+help () {
+echo '
+# Eggdrop Relay Settings
+# Eggdrop Bot Setup Guide
+# telnet EGG_HOST EGG_PORT
+# Login with the master user.pass then issue these commands
+
+
+# .+user <username>
+# .chpass <username> <password>
+# .+host <username> -telnet!*@*
+# .+host <username> *!*@YOUR.PASTEBIN.IP
+# .+host <username> *!*@YOUR.PASTEBIN.HOST.NAME
+# .+chattr <username> +jfp
+
+
+Example:
+	EGG_USER="pastebin"; # Username to log in with to the eggdrop
+	EGG_PASS="pastebinit"; # Password for the eggdrop user
+	EGG_PORT="24000"; # Port number of the eggdrop
+	EGG_CHAN="black"; # Channel where you want the announce, do not include the pound sign
+	EGG_HOST="localhost"; # IP/Hostname of the eggdrop
+	'
+}
+
+case "${1}" in
+	start) start ;;
+	stop) stop ;;
+	restart) restart ;;
+	help) help ;;
+	*) echo "Usage: ${0} {start|stop|restart|reload|status}"
+	exit 1
+;;
+esac
+exit 0

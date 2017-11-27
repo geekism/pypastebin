@@ -65,9 +65,10 @@ DIRECTORY = os.path.dirname(os.path.realpath(sys.argv[0]))
 
 if BACKGROUND == True:
     PIDF = DIRECTORY + '/pastebin.pid'
-    fpid = os.fork()
-    if fpid!=0:
-       fpid = os.fork()
+    tfpid = os.fork()
+    if tfpid!=0:
+       tfpid = os.fork()
+       fpid=tfpid - 1
        f = open(PIDF,'w')
        f.write(str(fpid))
        f.close()
@@ -114,7 +115,7 @@ PASTESCRIPT = """
 
 #!/usr/bin/perl<BR>
 use warnings;<BR>
-use LWP::UserAgent;<BR> 
+use LWP::UserAgent;<BR>
 use HTTP::Request::Common qw{ POST };<BR>
 use CGI;<BR>
 use WWW::Mechanize;<BR>
@@ -372,7 +373,7 @@ class MyHandler(SimpleHTTPRequestHandler):
                 tn.write(EUSER + '\n')
                 tn.read_until('Enter your password.')
                 tn.write(EPASSWD + '\n')
-                tn.write(".msg #" + ECHAN + " new paste:\002 " + URLHOSTNAME + "" + filename + "\n")
+                tn.write(".msg #" + ECHAN + " new paste:\002 "+HEADER+""+URLHOSTNAME+"/" + filename + "\n")
                 time.sleep(1)
                 tn.write(".exit")
                 self.end_headers()
@@ -425,4 +426,3 @@ if __name__ == "__main__":
            pass
        httpd.server_close()
        print time.asctime(), "Server Stops - %s:%s" % (HTTP_IP, HTTP_PORT)
-
