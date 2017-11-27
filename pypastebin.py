@@ -12,7 +12,7 @@ from datetime import datetime
 from OpenSSL import SSL
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-s', action='store_true', default=False, dest='boolean_switch', help='Start with OpenSSL, Create With: openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365')
+parser.add_argument('-s', action='store_true', default=False, dest='boolean_switch', help='Start with OpenSSL, Create With: openssl req -new -x509 -keyout server.pem -out server.pem -days 365 -nodes')
 parser.add_argument('-p', action='store', dest='startport', type=int, help='Start on select port')
 parser.add_argument('-b', action='store_true', default=False, dest='background', help='Start in the background')
 parser.add_argument('-f', action='store', dest='sslcert', help='Select your myserver.pem')
