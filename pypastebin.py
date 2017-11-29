@@ -18,6 +18,7 @@ parser.add_argument('-b', action='store_true', default=False, dest='background',
 parser.add_argument('-f', action='store', dest='sslcert', help='Select your myserver.pem')
 parser.add_argument('-l', action='store', dest='listenip', help='Select Listening IP')
 parser.add_argument('-u', action='store', dest='urlhost', help='subdomain.domain.com value')
+parser.add_argument('-t', action='store', dest='theme', help='Set WebUI Theme (List: stock)')
 parser.add_argument('-H', action='store', dest='eggdrop_host', help='Eggdrop Relay Hostname/IP')
 parser.add_argument('-C', action='store', dest='eggdrop_chan', help='Eggdrop Relay Channel')
 parser.add_argument('-P', action='store', dest='eggdrop_port', help='Eggdrop Port')
@@ -37,6 +38,7 @@ SSL_CERT = results.sslcert
 BACKGROUND = results.background
 URLHOSTNAME = results.urlhost
 RELAY = results.enableegg
+THEME = results.theme
 
 if START_SSL == True:
    HEADER = "https://"
@@ -104,8 +106,12 @@ sys.stderr = sl
 PASTESCRIPT = """
 <html>
     <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-        <link rel="stylesheet" type="text/css" href="%(CONTEXT_PATH)s/style.css">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link rel="stylesheet" type="text/css" href="http://justla.me/lang/sh_style.css">
+    <link rel="stylesheet" type="text/css" href="%(CONTEXT_PATH)s/style.css">
+    <link href="http://justla.me/themes/cyborg/bootstrap.min.css" rel="stylesheet">
+    <script src="http://justla.me/sh_main.min.js" type="text/javascript"></script>
+    <link rel="stylesheet" type="text/css" href="%(CONTEXT_PATH)s/style.css">
     </head>
 <CENTER>
 <title>pure pasting!</title>
@@ -138,8 +144,12 @@ print "paste: http://".$pasteserver."".$gurl."\n";<BR>
 CHANGELOG = """
 <html>
     <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-        <link rel="stylesheet" type="text/css" href="%(CONTEXT_PATH)s/style.css">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link rel="stylesheet" type="text/css" href="http://justla.me/lang/sh_style.css">
+    <link rel="stylesheet" type="text/css" href="%(CONTEXT_PATH)s/style.css">
+    <link href="http://justla.me/themes/cyborg/bootstrap.min.css" rel="stylesheet">
+    <script src="http://justla.me/sh_main.min.js" type="text/javascript"></script>
+    <link rel="stylesheet" type="text/css" href="%(CONTEXT_PATH)s/style.css">
     </head>
 <CENTER>
 <title>pure pasting!</title>
@@ -158,8 +168,12 @@ CHANGELOG = """
 ABOUT = """
 <html>
     <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-        <link rel="stylesheet" type="text/css" href="%(CONTEXT_PATH)s/style.css">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link rel="stylesheet" type="text/css" href="http://justla.me/lang/sh_style.css">
+    <link rel="stylesheet" type="text/css" href="%(CONTEXT_PATH)s/style.css">
+    <link href="http://justla.me/themes/cyborg/bootstrap.min.css" rel="stylesheet">
+    <script src="http://justla.me/sh_main.min.js" type="text/javascript"></script>
+    <link rel="stylesheet" type="text/css" href="%(CONTEXT_PATH)s/style.css">
     </head>
 <CENTER>
 <title>pure pasting!</title>
@@ -176,23 +190,26 @@ py-pastebin: This is a project that i decided to pick up, and change to suite my
 FORM = """
 <html class="html">
     <head>
-	<link rel="stylesheet" type="text/css" href="style.css">
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-	<link rel="stylesheet" type="text/css" href="http://shjs.sourceforge.net/lang/sh_$(LANG).css">
-        <link rel="stylesheet" type="text/css" href="%(CONTEXT_PATH)s/style.css">
-
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link rel="stylesheet" type="text/css" href="http://justla.me/lang/sh_style.css">
+	<link rel="stylesheet" type="text/css" href="%(CONTEXT_PATH)s/style.css">
+    <link href="http://justla.me/themes/cyborg/bootstrap.min.css" rel="stylesheet">
+    <script src="http://justla.me/sh_main.min.js" type="text/javascript"></script>
+    <link rel="stylesheet" type="text/css" href="%(CONTEXT_PATH)s/style.css">
     </head>
 <CENTER>
 <title>pure pasting!</title>
 <a href=/>paste</a> - <a href=/about>about</a> - <a href=/changelog>changelog</a> - <a href=/pastebinit>paste post script</a>
 </center>
 <BR><BR><BR>
-<body color=#00000>
     <body style="font-size: 12">
         <form action="/create" method="POST">
-            <textarea name="content" rows="20" class="content"></textarea>
-            <BR><BR><a href="javascript:document.forms[0].submit()" class="button">Paste</a>
+        <div class="form-group">
+            <label for="comment">Content:</label>
+            <textarea class="form-control" id="comment" name="content" rows="20" class="content"></textarea>
+        </div>
         </form>
+        <BR><BR><a href="javascript:document.forms[0].submit()" class="button">Submit</a>
     </body>
 </html>
 """
@@ -212,11 +229,11 @@ CONTENT_TEMPLATE = """
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-        <link rel="stylesheet" type="text/css" href="http://shjs.sourceforge.net/sh_style.css">
+        <link rel="stylesheet" type="text/css" href="http://justla.me/sh_style.css">
         <link rel="stylesheet" type="text/css" href="%(CONTEXT_PATH)s/style.css">
-
-        <script src="http://shjs.sourceforge.net/sh_main.min.js" type="text/javascript"></script>
-        <script type="text/javascript" src="http://shjs.sourceforge.net/lang/sh_%(LANG)s.js"></script>
+        <link href="http://justla.me/themes/cyborg/bootstrap.min.css" rel="stylesheet">
+        <script src="http://justla.me/sh_main.min.js" type="text/javascript"></script>
+        <script type="text/javascript" src="http://justla.me/lang/sh_%(LANG)s.js"></script>
     </head>
 <CENTER>
 <title>pure pasting!</title>
@@ -225,22 +242,22 @@ CONTENT_TEMPLATE = """
 <BR><BR><BR>
     <body onload="sh_highlightDocument();"><center>
         <ul id="lang_list_%(LANG)s">
-            <li><a class="lang_desktop" href="%(CONTEXT_PATH)s/desktop/%(PASTEBIN_FILE_NAME)s">Desktop</a></li>
-            <li><a class="lang_diff" href="%(CONTEXT_PATH)s/diff/%(PASTEBIN_FILE_NAME)s">DIFF</a></li>
-            <li><a class="lang_makefile" href="%(CONTEXT_PATH)s/makefile/%(PASTEBIN_FILE_NAME)s">Makefile</a></li>
-            <li><a class="lang_perl" href="%(CONTEXT_PATH)s/perl/%(PASTEBIN_FILE_NAME)s">PERL</a></li>
-            <li><a class="lang_ruby" href="%(CONTEXT_PATH)s/ruby/%(PASTEBIN_FILE_NAME)s">Ruby</a></li>
-            <li><a class="lang_xorg" href="%(CONTEXT_PATH)s/xorg/%(PASTEBIN_FILE_NAME)s">Xorg</a></li>
-            <li><a class="lang_tcl" href="%(CONTEXT_PATH)s/tcl/%(PASTEBIN_FILE_NAME)s">TCL</a></li>
-            <li><a class="lang_java" href="%(CONTEXT_PATH)s/java/%(PASTEBIN_FILE_NAME)s">Java</a></li>
-            <li><a class="lang_python" href="%(CONTEXT_PATH)s/python/%(PASTEBIN_FILE_NAME)s">Python</a></li>
-            <li><a class="lang_sql" href="%(CONTEXT_PATH)s/sql/%(PASTEBIN_FILE_NAME)s">Sql</a></li>
-            <li><a class="lang_javascript" class="" href="%(CONTEXT_PATH)s/javascript/%(PASTEBIN_FILE_NAME)s">Javascript</a></li>
-            <li><a class="lang_css" href="%(CONTEXT_PATH)s/css/%(PASTEBIN_FILE_NAME)s">Css</a></li>
-            <li><a class="lang_html" href="%(CONTEXT_PATH)s/html/%(PASTEBIN_FILE_NAME)s">Html</a></li>
-            <li><a class="lang_cpp" href="%(CONTEXT_PATH)s/cpp/%(PASTEBIN_FILE_NAME)s">Cpp</a></li>
-            <li><a class="plain" href="%(CONTEXT_PATH)s/plain/%(PASTEBIN_FILE_NAME)s">Plain</a></li>
-            <li><a class="last" href="%(CONTEXT_PATH)s/">Paste Again</a></li>
+            <a class="lang_desktop" href="%(CONTEXT_PATH)s/desktop/%(PASTEBIN_FILE_NAME)s">Desktop</a> /  
+            <a class="lang_diff" href="%(CONTEXT_PATH)s/diff/%(PASTEBIN_FILE_NAME)s">DIFF</a> / 
+            <a class="lang_makefile" href="%(CONTEXT_PATH)s/makefile/%(PASTEBIN_FILE_NAME)s">Makefile</a> / 
+            <a class="lang_perl" href="%(CONTEXT_PATH)s/perl/%(PASTEBIN_FILE_NAME)s">PERL</a> / 
+            <a class="lang_ruby" href="%(CONTEXT_PATH)s/ruby/%(PASTEBIN_FILE_NAME)s">Ruby</a> / 
+            <a class="lang_xorg" href="%(CONTEXT_PATH)s/xorg/%(PASTEBIN_FILE_NAME)s">Xorg</a> / 
+            <a class="lang_tcl" href="%(CONTEXT_PATH)s/tcl/%(PASTEBIN_FILE_NAME)s">TCL</a> / 
+            <a class="lang_java" href="%(CONTEXT_PATH)s/java/%(PASTEBIN_FILE_NAME)s">Java</a> / 
+            <a class="lang_python" href="%(CONTEXT_PATH)s/python/%(PASTEBIN_FILE_NAME)s">Python</a> / 
+            <a class="lang_sql" href="%(CONTEXT_PATH)s/sql/%(PASTEBIN_FILE_NAME)s">Sql</a> / 
+            <a class="lang_javascript" class="" href="%(CONTEXT_PATH)s/javascript/%(PASTEBIN_FILE_NAME)s">Javascript</a> /
+            <a class="lang_css" href="%(CONTEXT_PATH)s/css/%(PASTEBIN_FILE_NAME)s">Css</a> / 
+            <a class="lang_html" href="%(CONTEXT_PATH)s/html/%(PASTEBIN_FILE_NAME)s">Html</a> /
+            <a class="lang_cpp" href="%(CONTEXT_PATH)s/cpp/%(PASTEBIN_FILE_NAME)s">Cpp</a> / 
+            <a class="plain" href="%(CONTEXT_PATH)s/plain/%(PASTEBIN_FILE_NAME)s">Plain</a> / 
+            <a class="last" href="%(CONTEXT_PATH)s/">Paste Again</a>
         </ul></center>
         <br style="clear: both"/>
 	    <pre class="sh_%(LANG)s">%(CONTENT)s</pre>
@@ -250,15 +267,31 @@ CONTENT_TEMPLATE = """
 
 STYLE_CSS = """
 .html { }
-body {	background: #000000; font-family: monospace; font-size: 12px; color: #1E90FF; }
-a { color:#C0C0C0; text-decoration: none; }
-a:hover { color: #fefefe; text-decoration: underline; }
+body {
+font-family: monospace; 
+font-size: 12px; 
+}
+a { text-decoration: none; }
+a:hover { text-decoration: underline; }
 textarea { font-family: 'Cantarell', serif; font-size: 16px; }
 ul { display: block; text-shadow: none; height: 25px; margin: 0 0 0 -40; position: relative; float: center; }
 li { display: inline; margin-left: 5px; }
 li .last { margin-left: 30px; }
-pre { font-family: 'Courier New'; font-size: 16px; text-shadow: none; background-color: white; margin-left: 5px; padding: 5px; border: 1px solid #C9D7F1; margin-top: -5px;}
-.content { width: 80%; height: 80%; margin-left: 10%; margin-top: 1%; display: block; border: 3px solid #000; font-family: 'Courier New', Arial; }
+pre { 
+    font-family: 'monospace'; 
+    font-size: 12px; 
+    text-shadow: none;
+    margin-left: 5px; 
+    padding: 5px; 
+    border: 1px solid; 
+    margin-top: -5px;
+    white-space: pre-wrap; 
+    white-space: -moz-pre-wrap;
+    white-space: -pre-wrap; 
+    white-space: -o-pre-wrap;
+    word-wrap: break-word;  
+}
+.content { width: auto; height: 80%; margin-left: 12%; margin-top: 1%; display: block; border: 3px solid; font-family: 'Courier New', Arial; }
 .button { display:block; width:100px; height:50px; margin-left:45%; font-weight: bold; text-decoration: none; }
 .ul_parent { position: absolute; }
 #lang_list_java .lang_java, #lang_list_python .lang_python, #lang_list_javascript .lang_javascript, #lang_list_html .lang_html, #lang_list_css .lang_css, #lang_list_cpp .lang_cpp, #lang_list_sql .lang_sql, #lang_list_plain .lang_plain, #lang_list_desktop .lang_desktop, #lang_list_diff .lang_diff, #lang_list_makefile .lang_makefile, #lang_list_perl .lang_perl, #lang_list_ruby .lang_ruby, #lang_list_xorg .lang_xorg, #lang_list_tcl .lang_tcl { font-weight: bold; }
