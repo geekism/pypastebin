@@ -1,23 +1,20 @@
 #!/usr/bin/perl
 use warnings;
-use LWP::UserAgent; 
+use LWP::UserAgent;
 use HTTP::Request::Common qw{ POST };
 use CGI;
 use WWW::Mechanize;
-
 my $output = "";
 my $pasteserver = "192.168.1.4:8000";
 @userinput = <STDIN>;
 chomp (@userinput);
-foreach $i (@userinput) {
-	$output .= "$i\n";
-}
+#my $result = `@userinput`;
+foreach $i (@userinput) { $output .= "$i "; }
 my $url = "http://".$pasteserver."/create";
-my $ua      = LWP::UserAgent->new();
+my $ua = LWP::UserAgent->new();
 my $request = POST( $url, [ 'content' => $output ] );
 my $redir = $ua->request($request);
 my $gurl = $redir->header('Location');
 my $content = $ua->request($request)->as_string();
 my $cgi = CGI->new();
-print "paste: http://".$pasteserver."".$gurl."\n";
-
+print "new paste: http://".$pasteserver."".$gurl."\n";
